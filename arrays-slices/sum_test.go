@@ -1,4 +1,4 @@
-package arraysandslices
+package arrays_slices
 
 import (
 	"github.com/stretchr/testify/assert"
