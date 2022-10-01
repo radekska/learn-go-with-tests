@@ -77,3 +77,29 @@ func TestDictionaryUpdate(t *testing.T) {
 	})
 
 }
+
+func TestDictionaryDelete(t *testing.T) {
+	t.Run("word exists", func(t *testing.T) {
+
+		dictionary := Dictionary{"test": "to delete"}
+
+		err := dictionary.Delete("test")
+
+		assert.NoError(t, err)
+		_, err = dictionary.Search("test")
+		assert.Error(t, err)
+		assert.Equal(t, ErrNotFound, err)
+	})
+
+	t.Run("word not exists", func(t *testing.T) {
+		dictionary := Dictionary{"test": "something"}
+
+		err := dictionary.Delete("vanilla")
+
+		assert.Error(t, err)
+		assert.Equal(t, ErrCannotDelete, err)
+		got, err := dictionary.Search("test")
+		assert.NoError(t, err)
+		assert.Equal(t, "something", got)
+	})
+}
