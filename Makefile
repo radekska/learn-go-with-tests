@@ -1,5 +1,8 @@
-single:
+test:
 	go test -v -cover ./$(package)
 
-all:
-	go test -v ./...
+tests:
+	go test -v ./... -race
+
+benchmarks:
+	go test -bench=. ./...
