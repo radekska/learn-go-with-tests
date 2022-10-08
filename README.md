@@ -7,10 +7,15 @@ You will find here some micro toy projects in each folder with corresponding uni
 To run test for single section simply execute:
 
 ```shell
-make single package=<package-name>
+make test package=<package-name>
 ```
 
 To run all:
 ```shell
-make all
+make tests
+```
+
+To run benchmarks:
+```shell
+make benchmarks
 ```
