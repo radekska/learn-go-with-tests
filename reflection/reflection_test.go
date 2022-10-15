@@ -81,4 +81,19 @@ func TestWalk(t *testing.T) {
 		})
 	}
 
+	t.Run("with maps", func(t *testing.T) {
+		aMap := map[string]string{
+			"Foo": "Bar",
+			"Baz": "Boz",
+		}
+
+		var got []string
+		walk(aMap, func(input string) {
+			got = append(got, input)
+		})
+
+		assert.Contains(t, got, "Bar")
+		assert.Contains(t, got, "Boz")
+	})
+
 }
