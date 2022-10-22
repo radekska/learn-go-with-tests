@@ -23,8 +23,6 @@ var allRomanNumerals = []RomanNumeral{
 	{Value: 1, Symbol: "I"},
 }
 
-// TODO - https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/roman-numerals#parsing-roman-numerals
-
 func ConvertToRoman(number int) string {
 
 	var result strings.Builder
@@ -36,4 +34,23 @@ func ConvertToRoman(number int) string {
 		}
 	}
 	return result.String()
+}
+
+func ConvertToArabic(roman string) int {
+	// TODO
+	switch roman {
+	case "VI":
+		return 6
+	case "V":
+		return 5
+	case "IV":
+		return 4
+	case "III":
+		return 3
+	case "II":
+		return 2
+	case "I":
+		return 1
+	}
+	return 0
 }
