@@ -32,8 +32,8 @@ Description: Description 2`
 	posts, _ := blogposts.NewPostsFromFS(files)
 
 	wanted := []blogposts.Post{
-		blogposts.Post{Title: "Post 1", Description: "Description 1"},
-		blogposts.Post{Title: "Post 2", Description: "Description 2"},
+		{Title: "Post 1", Description: "Description 1"},
+		{Title: "Post 2", Description: "Description 2"},
 	}
 
 	assert.Equal(t, wanted, posts)
