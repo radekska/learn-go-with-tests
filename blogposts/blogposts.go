@@ -4,16 +4,27 @@ import (
 	"io/fs"
 )
 
-type Post struct {
-	Title, Description, Body string
-	Tags                     []string
+func NewPostsFromFS(filesystem fs.FS) ([]Post, error) {
+	dirEntries, err := fs.ReadDir(filesystem, ".")
+	if err != nil {
+		return nil, err
+	}
+	var posts []Post
+	for _, dirEntry := range dirEntries {
+		post, err := getPost(filesystem, dirEntry.Name())
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+	return posts, nil
 }
 
-func NewPostsFromFS(filesystem fs.FS) []Post {
-	dir, _ := fs.ReadDir(filesystem, ".")
-	var posts []Post
-	for range dir {
-		posts = append(posts, Post{})
+func getPost(fileSystem fs.FS, fileName string) (Post, error) {
+	postFile, err := fileSystem.Open(fileName)
+	if err != nil {
+		return Post{}, err
 	}
-	return posts
+	defer postFile.Close()
+	return newPost(postFile)
 }
