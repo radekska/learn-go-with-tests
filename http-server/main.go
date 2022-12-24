@@ -5,15 +5,15 @@ import (
 	"net/http"
 )
 
-type InMemoryPlayerStore struct {
-}
-
-func (i *InMemoryPlayerStore) GetPlayerScore(name string) int {
-	return 123
-}
-
 func main() {
-	store := InMemoryPlayerStore{}
-	server := &PlayerServer{store: &store}
+	store := NewInMemoryPlayerStore()
+	server := &PlayerServer{store: store}
 	log.Fatal(http.ListenAndServe(":8080", server))
 }
+
+// TODO
+// - Pick a store Postgres DB store
+// - Make PostgresPlayerStore implement PlayerStore
+// - TDD the functionality so you're sure it works
+// - Plug it into the integration test, check it's still ok
+// - Finally plug it into main

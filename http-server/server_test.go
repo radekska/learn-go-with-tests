@@ -9,7 +9,18 @@ import (
 )
 
 type StubPlayerStore struct {
-	scores map[string]int
+	scores   map[string]int
+	winCalls []string
+}
+
+func newGetScoreRequest(name string) *http.Request {
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
+	return request
+}
+
+func assertStatus(t *testing.T, got, want int) {
+	t.Helper()
+	assert.Equal(t, want, got, fmt.Sprintf("did not get correct status code, got %d, want %d", got, want))
 }
 
 func (s *StubPlayerStore) GetPlayerScore(name string) int {
@@ -17,7 +28,11 @@ func (s *StubPlayerStore) GetPlayerScore(name string) int {
 	return score
 }
 
-func TestGETPlayers(t *testing.T) {
+func (s *StubPlayerStore) RecordWin(name string) {
+	s.winCalls = append(s.winCalls, name)
+}
+
+func TestGetsScore(t *testing.T) {
 	store := StubPlayerStore{scores: map[string]int{"Pepper": 20, "Floyd": 10}}
 	server := &PlayerServer{store: &store}
 
@@ -52,12 +67,22 @@ func TestGETPlayers(t *testing.T) {
 	})
 }
 
-func newGetScoreRequest(name string) *http.Request {
-	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
+func newPostWinRequest(name string) *http.Request {
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", name), nil)
 	return request
 }
 
-func assertStatus(t *testing.T, got, want int) {
-	t.Helper()
-	assert.Equal(t, want, got, fmt.Sprintf("did not get correct status code, got %d, want %d", got, want))
+func TestStoreWins(t *testing.T) {
+	store := StubPlayerStore{scores: map[string]int{}}
+	server := &PlayerServer{store: &store}
+
+	t.Run("it returns created on POST", func(t *testing.T) {
+		request := newPostWinRequest("Pepper")
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		assertStatus(t, response.Code, http.StatusCreated)
+		assert.Equal(t, []string{"Pepper"}, store.winCalls)
+	})
 }
