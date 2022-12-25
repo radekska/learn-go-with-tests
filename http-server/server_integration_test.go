@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -9,12 +10,22 @@ import (
 	"testing"
 )
 
-func TestRecordWinsAndRetrievesThem(t *testing.T) {
+func clearTable(t *testing.T, db *sql.DB) {
+	t.Helper()
+	_, err := db.Exec("DELETE FROM players")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
 
+func TestRecordWinsAndRetrievesThem(t *testing.T) {
 	player := "Pepper"
+	db, _ := GetDatabase()
 
 	t.Run("test handles requests one by one", func(t *testing.T) {
-		store := NewInMemoryPlayerStore()
+		clearTable(t, db)
+
+		store := NewPostgresPlayerStore()
 		server := PlayerServer{store: store}
 
 		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
@@ -30,9 +41,11 @@ func TestRecordWinsAndRetrievesThem(t *testing.T) {
 	})
 
 	t.Run("test handles multiple score reads & writes at once", func(t *testing.T) {
-		store := NewInMemoryPlayerStore()
+		clearTable(t, db)
+
+		store := NewPostgresPlayerStore()
 		server := PlayerServer{store: store}
-		readsAndWrites := 10000
+		readsAndWrites := 100
 
 		var wg sync.WaitGroup
 		wg.Add(readsAndWrites)

@@ -1,0 +1,11 @@
+version: '3'
+services:
+  db:
+    image: postgres:12.5-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=players
