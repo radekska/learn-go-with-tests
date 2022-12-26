@@ -1,5 +1,5 @@
 dependencies:
-	docker-compose -f http-server/docker-compose.yml up -d
+	docker-compose -f http-server/docker/docker-compose.yml up -d
 
 test: dependencies
 	go test -v -cover ./$(package)
