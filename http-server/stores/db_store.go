@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"learn-go-with-tests/http-server/player"
 	"sync"
 )
 
@@ -57,4 +58,23 @@ func (p *PostgresPlayerStore) RecordWin(name string) {
 		}
 	}
 	p.mu.Unlock()
+}
+
+func (p *PostgresPlayerStore) GetLeague() []player.Player {
+	row, err := p.db.Query("SELECT name, score FROM players")
+	if err != nil {
+		panic(err)
+	}
+	var players []player.Player
+	for row.Next() {
+		var name string
+		var score int
+
+		if err := row.Scan(&name, &score); err != nil {
+			panic(err)
+		}
+		players = append(players, player.Player{Name: name, Wins: score})
+	}
+
+	return players
 }

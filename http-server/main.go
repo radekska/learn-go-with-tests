@@ -14,6 +14,6 @@ func main() {
 		log.Fatal(err)
 	}
 	store := stores.NewPostgresPlayerStore(db)
-	server := &server2.PlayerServer{Store: store}
+	server := server2.NewPlayerServer(store)
 	log.Fatal(http.ListenAndServe(":8080", server))
 }
