@@ -25,7 +25,7 @@ func TestRecordWinsAndRetrievesThem(t *testing.T) {
 	t.Run("test handles requests one by one", func(t *testing.T) {
 		clearTable(t, db)
 
-		store := NewPostgresPlayerStore()
+		store := NewPostgresPlayerStore(db)
 		server := PlayerServer{store: store}
 
 		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
@@ -38,12 +38,13 @@ func TestRecordWinsAndRetrievesThem(t *testing.T) {
 		assertStatus(t, response.Code, http.StatusOK)
 
 		assert.Equal(t, "3", response.Body.String())
+
 	})
 
 	t.Run("test handles multiple score reads & writes at once", func(t *testing.T) {
 		clearTable(t, db)
 
-		store := NewPostgresPlayerStore()
+		store := NewPostgresPlayerStore(db)
 		server := PlayerServer{store: store}
 		readsAndWrites := 100
 
