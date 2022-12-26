@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	db2 "learn-go-with-tests/http-server/db"
+	"learn-go-with-tests/http-server/player"
 	"learn-go-with-tests/http-server/stores"
 	"net/http"
 	"net/http/httptest"
@@ -20,22 +21,22 @@ func clearTable(t *testing.T, db *sql.DB) {
 	}
 }
 
-func TestRecordWinsAndRetrievesThem(t *testing.T) {
-	player := "Pepper"
+func TestRecordWinsAndRetrieveThem(t *testing.T) {
+	playerName := "Pepper"
 	db, _ := db2.GetDatabase()
 
 	t.Run("test handles requests one by one", func(t *testing.T) {
 		clearTable(t, db)
 
 		store := stores.NewPostgresPlayerStore(db)
-		server := PlayerServer{Store: store}
+		server := NewPlayerServer(store)
 
-		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
-		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(playerName))
+		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(playerName))
+		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(playerName))
 
 		response := httptest.NewRecorder()
-		server.ServeHTTP(response, newGetScoreRequest(player))
+		server.ServeHTTP(response, newGetScoreRequest(playerName))
 
 		assertStatus(t, response.Code, http.StatusOK)
 
@@ -47,7 +48,7 @@ func TestRecordWinsAndRetrievesThem(t *testing.T) {
 		clearTable(t, db)
 
 		store := stores.NewPostgresPlayerStore(db)
-		server := PlayerServer{Store: store}
+		server := NewPlayerServer(store)
 		readsAndWrites := 100
 
 		var wg sync.WaitGroup
@@ -55,8 +56,8 @@ func TestRecordWinsAndRetrievesThem(t *testing.T) {
 
 		for i := 0; i < readsAndWrites; i++ {
 			go func() {
-				server.ServeHTTP(httptest.NewRecorder(), newGetScoreRequest(player))
-				server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
+				server.ServeHTTP(httptest.NewRecorder(), newGetScoreRequest(playerName))
+				server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(playerName))
 				wg.Done()
 			}()
 		}
@@ -64,10 +65,33 @@ func TestRecordWinsAndRetrievesThem(t *testing.T) {
 		wg.Wait()
 
 		response := httptest.NewRecorder()
-		server.ServeHTTP(response, newGetScoreRequest(player))
+		server.ServeHTTP(response, newGetScoreRequest(playerName))
 
 		assertStatus(t, response.Code, http.StatusOK)
 		assert.Equal(t, fmt.Sprintf("%d", readsAndWrites), response.Body.String())
 	})
 
+}
+
+func TestGetLeague(t *testing.T) {
+	db, _ := db2.GetDatabase()
+	clearTable(t, db)
+
+	playerName := "John"
+
+	store := stores.NewPostgresPlayerStore(db)
+	server := NewPlayerServer(store)
+
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(playerName))
+	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(playerName))
+
+	response := httptest.NewRecorder()
+	server.ServeHTTP(response, newLeagueRequest())
+
+	got := getLeagueFromResponse(t, response.Body)
+	want := []player.Player{{playerName, 2}}
+
+	assert.Equal(t, want, got)
+	assertStatus(t, response.Code, http.StatusOK)
+	assertContentType(t, response, jsonContentType)
 }
