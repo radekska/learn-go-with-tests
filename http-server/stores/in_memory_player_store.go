@@ -1,10 +1,10 @@
-package main
+package stores
 
 import "sync"
 
-func NewInMemoryPlayerStore() *InMemoryPlayerStore {
-	return &InMemoryPlayerStore{store: map[string]int{}, mu: sync.Mutex{}}
-}
+//func NewInMemoryPlayerStore() *InMemoryPlayerStore {
+//	return &InMemoryPlayerStore{store: map[string]int{}, mu: sync.Mutex{}}
+//}
 
 type InMemoryPlayerStore struct {
 	store map[string]int

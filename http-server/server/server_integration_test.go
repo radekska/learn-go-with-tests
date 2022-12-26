@@ -1,9 +1,11 @@
-package main
+package server
 
 import (
 	"database/sql"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	db2 "learn-go-with-tests/http-server/db"
+	"learn-go-with-tests/http-server/stores"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -20,13 +22,13 @@ func clearTable(t *testing.T, db *sql.DB) {
 
 func TestRecordWinsAndRetrievesThem(t *testing.T) {
 	player := "Pepper"
-	db, _ := GetDatabase()
+	db, _ := db2.GetDatabase()
 
 	t.Run("test handles requests one by one", func(t *testing.T) {
 		clearTable(t, db)
 
-		store := NewPostgresPlayerStore(db)
-		server := PlayerServer{store: store}
+		store := stores.NewPostgresPlayerStore(db)
+		server := PlayerServer{Store: store}
 
 		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
 		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
@@ -44,8 +46,8 @@ func TestRecordWinsAndRetrievesThem(t *testing.T) {
 	t.Run("test handles multiple score reads & writes at once", func(t *testing.T) {
 		clearTable(t, db)
 
-		store := NewPostgresPlayerStore(db)
-		server := PlayerServer{store: store}
+		store := stores.NewPostgresPlayerStore(db)
+		server := PlayerServer{Store: store}
 		readsAndWrites := 100
 
 		var wg sync.WaitGroup

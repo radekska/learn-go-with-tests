@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ func (s *StubPlayerStore) RecordWin(name string) {
 
 func TestGetsScore(t *testing.T) {
 	store := StubPlayerStore{scores: map[string]int{"Pepper": 20, "Floyd": 10}}
-	server := &PlayerServer{store: &store}
+	server := &PlayerServer{Store: &store}
 
 	t.Run("returns Pepper's score", func(t *testing.T) {
 		request := newGetScoreRequest("Pepper")
@@ -74,7 +74,7 @@ func newPostWinRequest(name string) *http.Request {
 
 func TestStoreWins(t *testing.T) {
 	store := StubPlayerStore{scores: map[string]int{}}
-	server := &PlayerServer{store: &store}
+	server := &PlayerServer{Store: &store}
 
 	t.Run("it returns created on POST", func(t *testing.T) {
 		request := newPostWinRequest("Pepper")

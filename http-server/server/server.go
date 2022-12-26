@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 )
 
 type PlayerServer struct {
-	store PlayerStore
+	Store PlayerStore
 }
 type PlayerStore interface {
 	GetPlayerScore(name string) int
@@ -15,12 +15,12 @@ type PlayerStore interface {
 }
 
 func (p *PlayerServer) processWin(rw http.ResponseWriter, player string) {
-	p.store.RecordWin(player)
+	p.Store.RecordWin(player)
 	rw.WriteHeader(http.StatusCreated)
 }
 
 func (p *PlayerServer) showScore(rw http.ResponseWriter, player string) {
-	score := p.store.GetPlayerScore(player)
+	score := p.Store.GetPlayerScore(player)
 	if score == 0 {
 		rw.WriteHeader(http.StatusNotFound)
 	}
