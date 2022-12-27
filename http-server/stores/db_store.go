@@ -3,9 +3,10 @@ package stores
 import (
 	"database/sql"
 	"fmt"
+	"sync"
+
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"learn-go-with-tests/http-server/player"
-	"sync"
 )
 
 func NewPostgresPlayerStore(db *sql.DB) *PostgresPlayerStore {
@@ -60,7 +61,7 @@ func (p *PostgresPlayerStore) RecordWin(name string) {
 	p.mu.Unlock()
 }
 
-func (p *PostgresPlayerStore) GetLeague() []player.Player {
+func (p *PostgresPlayerStore) GetLeague() player.League {
 	row, err := p.db.Query("SELECT name, score FROM players")
 	if err != nil {
 		panic(err)
