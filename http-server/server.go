@@ -1,9 +1,8 @@
-package server
+package poker
 
 import (
 	"encoding/json"
 	"fmt"
-	"learn-go-with-tests/http-server/player"
 	"net/http"
 	"strings"
 )
@@ -33,7 +32,7 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 type PlayerStore interface {
 	GetPlayerScore(name string) int
 	RecordWin(name string)
-	GetLeague() player.League
+	GetLeague() League
 }
 
 func (p *PlayerServer) processWin(rw http.ResponseWriter, player string) {

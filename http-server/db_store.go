@@ -1,12 +1,10 @@
-package stores
+package poker
 
 import (
 	"database/sql"
-	"fmt"
 	"sync"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"learn-go-with-tests/http-server/player"
 )
 
 func NewPostgresPlayerStore(db *sql.DB) *PostgresPlayerStore {
@@ -21,12 +19,10 @@ type PostgresPlayerStore struct {
 func getPlayerScore(db *sql.DB, name string) (int, error) {
 	row := db.QueryRow("SELECT score FROM players WHERE name = $1", name)
 	if err := row.Err(); err != nil {
-		fmt.Println("db.QueryRow", err)
 		return 0, err
 	}
 	var score int
 	if err := row.Scan(&score); err != nil {
-		fmt.Println("row.Scan", err)
 		return 0, err
 	}
 	return score, nil
@@ -35,7 +31,6 @@ func getPlayerScore(db *sql.DB, name string) (int, error) {
 func (p *PostgresPlayerStore) GetPlayerScore(name string) int {
 	score, err := getPlayerScore(p.db, name)
 	if err != nil {
-		fmt.Printf("failed to retrieve score for %s player\n", name)
 		return 0
 	}
 	return score
@@ -48,25 +43,23 @@ func (p *PostgresPlayerStore) RecordWin(name string) {
 	if err != nil {
 		_, err = p.db.Exec("INSERT INTO players VALUES($1, $2)", name, 1)
 		if err != nil {
-			fmt.Println("db.Exec", err)
 			return
 		}
 	} else {
 		_, err = p.db.Exec("UPDATE players SET score=$1+1 WHERE name=$2", score, name)
 		if err != nil {
-			fmt.Println("db.Exec", err)
 			return
 		}
 	}
 	p.mu.Unlock()
 }
 
-func (p *PostgresPlayerStore) GetLeague() player.League {
+func (p *PostgresPlayerStore) GetLeague() League {
 	row, err := p.db.Query("SELECT name, score FROM players")
 	if err != nil {
 		panic(err)
 	}
-	var players []player.Player
+	var players League
 	for row.Next() {
 		var name string
 		var score int
@@ -74,8 +67,9 @@ func (p *PostgresPlayerStore) GetLeague() player.League {
 		if err := row.Scan(&name, &score); err != nil {
 			panic(err)
 		}
-		players = append(players, player.Player{Name: name, Wins: score})
+		players = append(players, Player{Name: name, Wins: score})
 	}
 
+	players.Sort()
 	return players
 }

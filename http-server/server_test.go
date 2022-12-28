@@ -1,20 +1,13 @@
-package server
+package poker
 
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io"
-	"learn-go-with-tests/http-server/player"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
-
-type StubPlayerStore struct {
-	scores   map[string]int
-	winCalls []string
-	league   player.League
-}
 
 func newGetScoreRequest(name string) *http.Request {
 	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
@@ -24,19 +17,6 @@ func newGetScoreRequest(name string) *http.Request {
 func assertStatus(t *testing.T, got, want int) {
 	t.Helper()
 	assert.Equal(t, want, got, fmt.Sprintf("did not get correct status code, got %d, want %d", got, want))
-}
-
-func (s *StubPlayerStore) GetPlayerScore(name string) int {
-	score := s.scores[name]
-	return score
-}
-
-func (s *StubPlayerStore) RecordWin(name string) {
-	s.winCalls = append(s.winCalls, name)
-}
-
-func (s *StubPlayerStore) GetLeague() player.League {
-	return s.league
 }
 
 func TestGetsScore(t *testing.T) {
@@ -90,7 +70,7 @@ func TestStoreWins(t *testing.T) {
 		server.ServeHTTP(response, request)
 
 		assertStatus(t, response.Code, http.StatusCreated)
-		assert.Equal(t, []string{"Pepper"}, store.winCalls)
+		AssertPlayerWin(t, &store, "Pepper")
 	})
 }
 
@@ -99,7 +79,7 @@ const jsonContentType = "application/json"
 func TestLeague(t *testing.T) {
 
 	t.Run("it returns the league table as JSON", func(t *testing.T) {
-		wantedLeague := []player.Player{
+		wantedLeague := []Player{
 			{"Cleo", 32},
 			{"Chris", 20},
 			{"John", 14},
@@ -129,8 +109,8 @@ func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want s
 	assert.Equalf(t, want, response.Result().Header.Get("content-type"), "response did not have content-type of %s, got %v", want, response.Result().Header)
 }
 
-func getLeagueFromResponse(t testing.TB, body io.Reader) (league []player.Player) {
+func getLeagueFromResponse(t testing.TB, body io.Reader) (league []Player) {
 	t.Helper()
-	league, _ = player.NewLeague(body)
+	league, _ = NewLeague(body)
 	return league
 }

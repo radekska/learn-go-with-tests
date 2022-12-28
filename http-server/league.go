@@ -1,9 +1,10 @@
-package player
+package poker
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"sort"
 )
 
 type League []Player
@@ -15,6 +16,12 @@ func (l League) FindPlayer(name string) *Player {
 		}
 	}
 	return nil
+}
+
+func (l League) Sort() {
+	sort.Slice(l, func(i, j int) bool {
+		return l[i].Wins > l[j].Wins
+	})
 }
 
 func NewLeague(rdr io.Reader) (League, error) {

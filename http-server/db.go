@@ -1,4 +1,4 @@
-package db
+package poker
 
 import (
 	"database/sql"

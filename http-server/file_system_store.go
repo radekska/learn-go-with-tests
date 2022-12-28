@@ -1,17 +1,14 @@
-package stores
+package poker
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"sort"
-
-	"learn-go-with-tests/http-server/player"
 )
 
 type FileSystemPlayerStore struct {
 	Database *json.Encoder
-	league   player.League
+	league   League
 }
 
 func initialisePlayerDBFile(file *os.File) error {
@@ -36,7 +33,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 		return nil, fmt.Errorf("problem initialising player db file, %v", err)
 	}
 
-	league, err := player.NewLeague(file)
+	league, err := NewLeague(file)
 
 	if err != nil {
 		return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
@@ -48,10 +45,8 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 	}, nil
 }
 
-func (f *FileSystemPlayerStore) GetLeague() player.League {
-	sort.Slice(f.league, func(i, j int) bool {
-		return f.league[i].Wins > f.league[j].Wins
-	})
+func (f *FileSystemPlayerStore) GetLeague() League {
+	f.league.Sort()
 	return f.league
 }
 
@@ -74,11 +69,31 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 	if p != nil {
 		p.Wins++
 	} else {
-		f.league = append(f.league, player.Player{
+		f.league = append(f.league, Player{
 			Name: name,
 			Wins: 1,
 		})
 	}
 
 	f.Database.Encode(f.league)
+}
+
+func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(), error) {
+	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
+
+	if err != nil {
+		return nil, nil, fmt.Errorf("problem opening %s %v", path, err)
+	}
+
+	closeFunc := func() {
+		db.Close()
+	}
+
+	store, err := NewFileSystemPlayerStore(db)
+
+	if err != nil {
+		return nil, nil, fmt.Errorf("problem creating file system player store, %v ", err)
+	}
+
+	return store, closeFunc, nil
 }
