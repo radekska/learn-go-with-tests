@@ -1,4 +1,4 @@
-package stores
+package http_server
 
 import (
 	"database/sql"
@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"learn-go-with-tests/http-server/player"
 )
 
 func NewPostgresPlayerStore(db *sql.DB) *PostgresPlayerStore {
@@ -61,12 +60,12 @@ func (p *PostgresPlayerStore) RecordWin(name string) {
 	p.mu.Unlock()
 }
 
-func (p *PostgresPlayerStore) GetLeague() player.League {
+func (p *PostgresPlayerStore) GetLeague() League {
 	row, err := p.db.Query("SELECT name, score FROM players")
 	if err != nil {
 		panic(err)
 	}
-	var players []player.Player
+	var players League
 	for row.Next() {
 		var name string
 		var score int
@@ -74,8 +73,9 @@ func (p *PostgresPlayerStore) GetLeague() player.League {
 		if err := row.Scan(&name, &score); err != nil {
 			panic(err)
 		}
-		players = append(players, player.Player{Name: name, Wins: score})
+		players = append(players, Player{Name: name, Wins: score})
 	}
 
+	players.Sort()
 	return players
 }

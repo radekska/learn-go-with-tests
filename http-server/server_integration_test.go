@@ -1,12 +1,9 @@
-package server
+package http_server
 
 import (
 	"database/sql"
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	db2 "learn-go-with-tests/http-server/db"
-	"learn-go-with-tests/http-server/player"
-	"learn-go-with-tests/http-server/stores"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -23,12 +20,12 @@ func clearTable(t *testing.T, db *sql.DB) {
 
 func TestRecordWinsAndRetrieveThem(t *testing.T) {
 	playerName := "Pepper"
-	db, _ := db2.GetDatabase()
+	db, _ := GetDatabase()
 
 	t.Run("test handles requests one by one", func(t *testing.T) {
 		clearTable(t, db)
 
-		store := stores.NewPostgresPlayerStore(db)
+		store := NewPostgresPlayerStore(db)
 		server := NewPlayerServer(store)
 
 		server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(playerName))
@@ -47,7 +44,7 @@ func TestRecordWinsAndRetrieveThem(t *testing.T) {
 	t.Run("test handles multiple score reads & writes at once", func(t *testing.T) {
 		clearTable(t, db)
 
-		store := stores.NewPostgresPlayerStore(db)
+		store := NewPostgresPlayerStore(db)
 		server := NewPlayerServer(store)
 		readsAndWrites := 100
 
@@ -74,12 +71,12 @@ func TestRecordWinsAndRetrieveThem(t *testing.T) {
 }
 
 func TestGetLeague(t *testing.T) {
-	db, _ := db2.GetDatabase()
+	db, _ := GetDatabase()
 	clearTable(t, db)
 
 	playerName := "John"
 
-	store := stores.NewPostgresPlayerStore(db)
+	store := NewPostgresPlayerStore(db)
 	server := NewPlayerServer(store)
 
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(playerName))
@@ -89,7 +86,7 @@ func TestGetLeague(t *testing.T) {
 	server.ServeHTTP(response, newLeagueRequest())
 
 	got := getLeagueFromResponse(t, response.Body)
-	want := []player.Player{{playerName, 2}}
+	want := []Player{{playerName, 2}}
 
 	assert.Equal(t, want, got)
 	assertStatus(t, response.Code, http.StatusOK)

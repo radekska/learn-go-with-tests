@@ -1,4 +1,4 @@
-package db
+package http_server
 
 import (
 	"database/sql"

@@ -1,10 +1,9 @@
-package server
+package http_server
 
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io"
-	"learn-go-with-tests/http-server/player"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,7 +12,7 @@ import (
 type StubPlayerStore struct {
 	scores   map[string]int
 	winCalls []string
-	league   player.League
+	league   League
 }
 
 func newGetScoreRequest(name string) *http.Request {
@@ -35,7 +34,7 @@ func (s *StubPlayerStore) RecordWin(name string) {
 	s.winCalls = append(s.winCalls, name)
 }
 
-func (s *StubPlayerStore) GetLeague() player.League {
+func (s *StubPlayerStore) GetLeague() League {
 	return s.league
 }
 
@@ -99,7 +98,7 @@ const jsonContentType = "application/json"
 func TestLeague(t *testing.T) {
 
 	t.Run("it returns the league table as JSON", func(t *testing.T) {
-		wantedLeague := []player.Player{
+		wantedLeague := []Player{
 			{"Cleo", 32},
 			{"Chris", 20},
 			{"John", 14},
@@ -129,8 +128,8 @@ func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want s
 	assert.Equalf(t, want, response.Result().Header.Get("content-type"), "response did not have content-type of %s, got %v", want, response.Result().Header)
 }
 
-func getLeagueFromResponse(t testing.TB, body io.Reader) (league []player.Player) {
+func getLeagueFromResponse(t testing.TB, body io.Reader) (league []Player) {
 	t.Helper()
-	league, _ = player.NewLeague(body)
+	league, _ = NewLeague(body)
 	return league
 }

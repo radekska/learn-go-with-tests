@@ -1,8 +1,7 @@
 package main
 
 import (
-	server2 "learn-go-with-tests/http-server/server"
-	"learn-go-with-tests/http-server/stores"
+	"learn-go-with-tests/http-server"
 	"log"
 	"net/http"
 	"os"
@@ -23,11 +22,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("problem opening %s %v", dbFileName, err)
 	}
-	store, err := stores.NewFileSystemPlayerStore(jsonDB)
+	store, err := http_server.NewFileSystemPlayerStore(jsonDB)
 	if err != nil {
 		log.Fatalf("problem creating file system player store, %v ", err)
 	}
-	server := server2.NewPlayerServer(store)
+	server := http_server.NewPlayerServer(store)
 
 	log.Fatal(http.ListenAndServe(":8080", server))
 }

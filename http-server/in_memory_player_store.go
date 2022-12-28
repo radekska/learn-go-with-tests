@@ -1,4 +1,4 @@
-package stores
+package http_server
 
 import "sync"
 

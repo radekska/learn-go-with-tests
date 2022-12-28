@@ -1,11 +1,10 @@
-package stores
+package http_server
 
 import (
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"learn-go-with-tests/http-server/player"
 )
 
 func createTempFile(t testing.TB, initialData string) (*os.File, func()) {
@@ -37,7 +36,7 @@ func TestFileSystemStore(t *testing.T) {
 
 		got := store.GetLeague()
 
-		want := player.League{
+		want := League{
 			{"Chris", 33},
 			{"Cleo", 10},
 		}
@@ -115,7 +114,7 @@ func TestFileSystemStore(t *testing.T) {
 
 		got := store.GetLeague()
 
-		want := player.League{
+		want := League{
 			{"Chris", 33},
 			{"Cleo", 10},
 		}
