@@ -1,8 +1,7 @@
-package http_server
+package poker
 
 import (
 	"database/sql"
-	"fmt"
 	"sync"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -20,12 +19,10 @@ type PostgresPlayerStore struct {
 func getPlayerScore(db *sql.DB, name string) (int, error) {
 	row := db.QueryRow("SELECT score FROM players WHERE name = $1", name)
 	if err := row.Err(); err != nil {
-		fmt.Println("db.QueryRow", err)
 		return 0, err
 	}
 	var score int
 	if err := row.Scan(&score); err != nil {
-		fmt.Println("row.Scan", err)
 		return 0, err
 	}
 	return score, nil
@@ -34,7 +31,6 @@ func getPlayerScore(db *sql.DB, name string) (int, error) {
 func (p *PostgresPlayerStore) GetPlayerScore(name string) int {
 	score, err := getPlayerScore(p.db, name)
 	if err != nil {
-		fmt.Printf("failed to retrieve score for %s player\n", name)
 		return 0
 	}
 	return score
@@ -47,13 +43,11 @@ func (p *PostgresPlayerStore) RecordWin(name string) {
 	if err != nil {
 		_, err = p.db.Exec("INSERT INTO players VALUES($1, $2)", name, 1)
 		if err != nil {
-			fmt.Println("db.Exec", err)
 			return
 		}
 	} else {
 		_, err = p.db.Exec("UPDATE players SET score=$1+1 WHERE name=$2", score, name)
 		if err != nil {
-			fmt.Println("db.Exec", err)
 			return
 		}
 	}

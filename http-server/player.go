@@ -1,4 +1,4 @@
-package http_server
+package poker
 
 // Player stores a name with a number of wins
 type Player struct {
